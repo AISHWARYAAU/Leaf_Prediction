@@ -1,13 +1,11 @@
 import streamlit as st
 from PIL import Image
-import io
-import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 import pandas as pd
-import pathlib
-import platform
 import os
+import platform
+import pathlib
 
 # Platform-specific path handling
 plt = platform.system()
@@ -86,7 +84,7 @@ classes = [
 
 classes_and_descriptions = {
     "Apple___Apple_scab": "Apple with Apple scab disease detected.",
-    "Apple___Black_rot": "Apple with Black rot disease detected",
+    "Apple___Black_rot": "Apple with Black rot disease detected.",
     "Apple___Cedar_apple_rust": "Apple with Cedar apple rust disease detected.",
     "Apple___healthy": "Healthy apple leaf detected.",
     "Blueberry___healthy": "Healthy blueberry leaf detected.",
@@ -107,8 +105,8 @@ classes_and_descriptions = {
     "Pepper,_bell___healthy": "Healthy bell pepper leaf detected.",
     "Potato___Early_blight": "Potato with Early blight disease detected.",
     "Potato___Late_blight": "Potato with Late blight disease detected.",
-    "Potato___healthy": "Healthy potato leaf detected",
-    "Raspberry___healthy": "Healthy raspberry leaf detected",
+    "Potato___healthy": "Healthy potato leaf detected.",
+    "Raspberry___healthy": "Healthy raspberry leaf detected.",
     "Soybean___healthy": "Healthy soybean leaf detected.",
     "Squash___Powdery_mildew": "Squash with Powdery mildew disease detected.",
     "Strawberry___Leaf_scorch": "Strawberry with Leaf scorch disease detected.",
@@ -126,8 +124,50 @@ classes_and_descriptions = {
     "Background_without_leaves": "No plant leaf detected in the image.",
 }
 
+# Define remedies for each class (example)
+remedies = {
+    "Apple___Apple_scab": "Apply fungicide and remove affected leaves.",
+    "Apple___Black_rot": "Use copper-based fungicides and prune infected branches.",
+    "Apple___Cedar_apple_rust": "Use rust-resistant apple varieties and apply fungicides.",
+    "Apple___healthy": "No action needed.",
+    "Blueberry___healthy": "No action needed.",
+    "Cherry_(including_sour)___Powdery_mildew": "Apply sulfur-based fungicides and improve air circulation.",
+    "Cherry_(including_sour)___healthy": "No action needed.",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": "Use resistant varieties and apply fungicides.",
+    "Corn_(maize)___Common_rust_": "Apply fungicides and use resistant corn varieties.",
+    "Corn_(maize)___Northern_Leaf_Blight": "Apply fungicides and rotate crops.",
+    "Corn_(maize)___healthy": "No action needed.",
+    "Grape___Black_rot": "Apply fungicides and remove infected plant parts.",
+    "Grape___Esca_(Black_Measles)": "Remove infected vines and apply appropriate fungicides.",
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": "Apply fungicides and improve air circulation.",
+    "Grape___healthy": "No action needed.",
+    "Orange___Haunglongbing_(Citrus_greening)": "Remove infected trees and use disease-free planting material.",
+    "Peach___Bacterial_spot": "Use copper-based bactericides and remove infected leaves.",
+    "Peach___healthy": "No action needed.",
+    "Pepper,_bell___Bacterial_spot": "Apply copper-based bactericides and improve air circulation.",
+    "Pepper,_bell___healthy": "No action needed.",
+    "Potato___Early_blight": "Apply fungicides and practice crop rotation.",
+    "Potato___Late_blight": "Use resistant varieties and apply fungicides.",
+    "Potato___healthy": "No action needed.",
+    "Raspberry___healthy": "No action needed.",
+    "Soybean___healthy": "No action needed.",
+    "Squash___Powdery_mildew": "Apply sulfur-based fungicides and improve air circulation.",
+    "Strawberry___Leaf_scorch": "Adjust watering practices and use appropriate fungicides.",
+    "Strawberry___healthy": "No action needed.",
+    "Tomato___Bacterial_spot": "Use copper-based bactericides and improve air circulation.",
+    "Tomato___Early_blight": "Apply fungicides and practice crop rotation.",
+    "Tomato___Late_blight": "Use resistant varieties and apply fungicides.",
+    "Tomato___Leaf_Mold": "Improve air circulation and apply appropriate fungicides.",
+    "Tomato___Septoria_leaf_spot": "Use resistant varieties and apply fungicides.",
+    "Tomato___Spider_mites Two-spotted_spider_mite": "Apply miticides and improve irrigation practices.",
+    "Tomato___Target_Spot": "Apply fungicides and improve air circulation.",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": "Use resistant varieties and control whiteflies.",
+    "Tomato___Tomato_mosaic_virus": "Use resistant varieties and manage insect vectors.",
+    "Tomato___healthy": "No action needed.",
+    "Background_without_leaves": "No plant leaf detected – please upload an image with a clear leaf."
+}
 
-# Define the functions to load images
+# Function to load and preprocess the image
 def load_image(image_file):
     img = Image.open(image_file)
     return img
@@ -145,7 +185,7 @@ def load_model_file(model_path):
 def Plant_Disease_Detection(image_path):
     model = load_model_file("Plant_disease.h5")
     if model is None:
-        return None, None
+        return None, None, None
 
     image = Image.open(image_path).resize((256, 256))
     image = np.array(image) / 255.0
@@ -153,7 +193,8 @@ def Plant_Disease_Detection(image_path):
 
     prediction = model.predict(image)
     predicted_class = classes[np.argmax(prediction)]
-    return prediction, predicted_class
+    confidence = np.max(prediction) * 100  # Confidence level
+    return prediction, predicted_class, confidence
 
 # Main script to handle file upload and predictions
 img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
@@ -163,9 +204,23 @@ if img_file_buffer is not None:
     st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
 
     with st.spinner("Analyzing the image..."):
-        prediction, class_name = Plant_Disease_Detection(img_file_buffer)
+        prediction, class_name, confidence = Plant_Disease_Detection(img_file_buffer)
         if prediction is not None:
             st.write(f"Prediction: {class_name}")
-            st.write(f"Description: {classes_and_descriptions[class_name]}")
+            st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
+            st.write(f"Confidence: {confidence:.2f}%")
+            
+            # Prepare data for the table
+            recommendation = remedies.get(class_name, 'No recommendation available.')
+            
+            data = {
+                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Confidence"],
+                "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
+                           class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
+                           recommendation,
+                           f"{confidence:.2f}%"]
+            }
+            df = pd.DataFrame(data)
+            st.table(df)
         else:
             st.error("Failed to make a prediction. Please check the logs for details.")
