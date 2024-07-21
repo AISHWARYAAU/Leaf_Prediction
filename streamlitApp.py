@@ -16,7 +16,7 @@ if plt == "Windows":
 np.set_printoptions(suppress=True)
 
 # Set up the page layout
-st.set_page_config(page_title="ChromaticScan", page_icon=":leaf:")
+st.set_page_config(page_title="ChromaticScan", page_icon="🌿")
 
 st.title("ChromaticScan")
 
