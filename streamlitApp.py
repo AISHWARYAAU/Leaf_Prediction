@@ -1,12 +1,11 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
+from tensorflow.keras.models import load_model
 import pandas as pd
 import os
 import platform
 import pathlib
-import cv2
-from tensorflow.keras.models import load_model
 
 # Platform-specific path handling
 plt = platform.system()
@@ -168,10 +167,12 @@ remedies = {
     "Background_without_leaves": "No plant leaf detected – please upload an image with a clear leaf."
 }
 
+# Function to load and preprocess the image
 def load_image(image_file):
     img = Image.open(image_file)
     return img
 
+# Function to load the model
 def load_model_file(model_path):
     if os.path.exists(model_path):
         model = load_model(model_path)
@@ -180,6 +181,7 @@ def load_model_file(model_path):
         st.error("Model file not found. Please check the path and try again.")
         return None
 
+# Function for Plant Disease Detection
 def Plant_Disease_Detection(image_path):
     model = load_model_file("Plant_disease.h5")
     if model is None:
@@ -194,43 +196,15 @@ def Plant_Disease_Detection(image_path):
     confidence = np.max(prediction) * 100  # Confidence level
     return prediction, predicted_class, confidence
 
-def load_uploaded_image(file):
-    file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
-    opencv_image = cv2.imdecode(file_bytes, 1)
-    return opencv_image
+# Main script to handle file upload and predictions
+img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
 
-def process_image(img_file):
-    img = load_image(img_file)
-    return img
+if img_file_buffer is not None:
+    img = load_image(img_file_buffer)
+    st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
 
-# Set up the sidebar
-st.subheader("Select Image Input Method")
-input_method = st.radio("options", ["File Uploader", "Camera Input"], label_visibility="collapsed")
-
-# Check which input method was selected
-if input_method == "File Uploader":
-    uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
-    if uploaded_file is not None:
-        uploaded_file_img = load_uploaded_image(uploaded_file)
-        st.image(uploaded_file_img, caption="Uploaded Image", width=300)
-        st.success("Image uploaded successfully!")
-        img = process_image(uploaded_file)
-elif input_method == "Camera Input":
-    st.warning("Please allow access to your camera.")
-    camera_image_file = st.camera_input("Click an Image")
-    if camera_image_file is not None:
-        camera_file_img = load_uploaded_image(camera_image_file)
-        st.image(camera_file_img, caption="Camera Input Image", width=300)
-        st.success("Image clicked successfully!")
-        img = process_image(camera_image_file)
-else:
-    img = None
-
-if img is not None:
-    st.image(img, caption="Processed Leaf Image", use_column_width=True)
-    
     with st.spinner("Analyzing the image..."):
-        prediction, class_name, confidence = Plant_Disease_Detection(img)
+        prediction, class_name, confidence = Plant_Disease_Detection(img_file_buffer)
         if prediction is not None:
             st.write(f"Prediction: {class_name}")
             st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
@@ -240,7 +214,7 @@ if img is not None:
             recommendation = remedies.get(class_name, 'No recommendation available.')
             
             data = {
-                "Details": ["Leaf Status", "Disease Name", "Treatment", "Accuracy"],
+                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
                 "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
                            class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
                            recommendation,
