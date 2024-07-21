@@ -3,10 +3,11 @@ from PIL import Image
 import io
 import cv2
 import numpy as np
-from fastai.vision.all import load_learner
+from tensorflow.keras.models import load_model
 import pandas as pd
 import pathlib
 import platform
+import os
 
 # Platform-specific path handling
 plt = platform.system()
@@ -121,11 +122,10 @@ classes_and_descriptions = {
     "Tomato___Target_Spot": "Tomato leaf with Target Spot disease detected.",
     "Tomato___Tomato_Yellow_Leaf_Curl_Virus": "Tomato leaf with Tomato Yellow Leaf Curl Virus disease detected.",
     "Tomato___Tomato_mosaic_virus": "Tomato leaf with Tomato mosaic virus disease detected.",
-    "Tomato___healthy": "Healthy tomato leaf.",
-    "Background_without_leaves": "No plant leaf detected in the image.",
+    "Tomato___healthy": "Healthy tomato leaf detected.",
+    "Background_without_leaves": "The provided image doesn't contain leaves.",
 }
 
-# Example remedies dataframe (You should replace this with actual data)
 df_rem = pd.DataFrame({
     "Diseases": ["Apple___Apple_scab", "Apple___Black_rot", "Tomato___Bacterial_spot"],
     "Remedies": [
@@ -170,16 +170,22 @@ elif input_method == "Camera Input":
         st.warning("Please click an image.")
 
 # Model file path
-export_file_path = "./models/export.pkl"
+export_file_path = os.path.join(os.path.dirname(__file__), "models", "Plant_disease.h5")
 
 def Plant_Disease_Detection(img_file_path):
-    model = load_learner(export_file_path, "export.pkl")
-    prediction = model.predict(img_file_path)[0]
-    if prediction not in classes:
-        prediction_sentence = f"The uploaded image is {prediction}, which is not compatible with the application. Please upload an image of a plant leaf for disease detection."
-        return prediction_sentence
-    prediction_sentence = classes_and_descriptions[prediction]
-    return prediction_sentence, prediction
+    try:
+        model = load_model(export_file_path)
+        img_array = cv2.resize(img_file_path, (224, 224))  # Resizing to match model input size
+        img_array = np.expand_dims(img_array, axis=0)  # Adding batch dimension
+        prediction = model.predict(img_array)
+        predicted_class = classes[np.argmax(prediction)]
+        if predicted_class not in classes:
+            prediction_sentence = f"The uploaded image is {predicted_class}, which is not compatible with the application. Please upload an image of a plant leaf for disease detection."
+            return prediction_sentence
+        prediction_sentence = classes_and_descriptions[predicted_class]
+        return prediction_sentence, predicted_class
+    except FileNotFoundError:
+        return "Model file not found. Please check the path and try again.", None
 
 submit = st.button(label="Submit Leaf Image")
 if submit:
@@ -190,7 +196,9 @@ if submit:
         img_file_path = camera_file_img
     prediction, class_name = Plant_Disease_Detection(img_file_path)
     with st.spinner(text="This may take a moment..."):
-        if "healthy" in class_name:
+        if class_name is None:
+            st.error(prediction)
+        elif "healthy" in class_name:
             st.write(f"Prediction:\nLeaf name: {class_name.split('___')[0]} \nLeaf is: Healthy")
         else:
             disease_name = class_name.split("___")[1].replace("_", " ")
@@ -213,4 +221,3 @@ footer = """
 """
 
 st.markdown(footer, unsafe_allow_html=True)
-
