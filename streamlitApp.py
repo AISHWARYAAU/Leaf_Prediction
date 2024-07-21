@@ -24,7 +24,7 @@ st.caption(
     "A ResNet 34-based Algorithm for Robust Plant Disease Detection with 99.2% Accuracy Across 39 Different Classes of Plant Leaf Images."
 )
 
-st.write("Try clicking a leaf image or capturing one from your camera to see how an AI Model detects its disease.")
+st.write("Try clicking a leaf image and watch how an AI Model will detect its disease.")
 
 with st.sidebar:
     img = Image.open("./Images/leaf.png")
@@ -182,12 +182,12 @@ def load_model_file(model_path):
         return None
 
 # Function for Plant Disease Detection
-def Plant_Disease_Detection(image_path):
+def Plant_Disease_Detection(image):
     model = load_model_file("Plant_disease.h5")
     if model is None:
         return None, None, None
 
-    image = Image.open(image_path).resize((256, 256))
+    image = image.resize((256, 256))
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
@@ -196,48 +196,29 @@ def Plant_Disease_Detection(image_path):
     confidence = np.max(prediction) * 100  # Confidence level
     return prediction, predicted_class, confidence
 
-# Main script to handle file upload and camera input
-st.write("Upload an image or use the camera to capture a leaf image.")
+# Main script to handle file upload and camera capture
+uploaded_image = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
+captured_image = st.camera_input("Capture an image of a leaf")
 
-# Camera input
-camera_input = st.camera_input("Capture a leaf image from your camera")
-
-# File uploader
-img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
-
-# Determine which input source is being used
-if camera_input is not None:
-    img = load_image(camera_input)
-    st.image(img, caption="Captured Leaf Image", use_column_width=True)
-
-    with st.spinner("Analyzing the image..."):
-        prediction, class_name, confidence = Plant_Disease_Detection(camera_input)
-        if prediction is not None:
-            st.write(f"Prediction: {class_name}")
-            st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
-            st.write(f"Confidence: {confidence:.2f}%")
-            
-            # Prepare data for the table
-            recommendation = remedies.get(class_name, 'No recommendation available.')
-            
-            data = {
-                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
-                "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
-                           class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
-                           recommendation,
-                           f"{confidence:.2f}%"]
-            }
-            df = pd.DataFrame(data)
-            st.table(df)
-        else:
-            st.error("Failed to make a prediction. Please check the logs for details.")
-
-elif img_file_buffer is not None:
-    img = load_image(img_file_buffer)
+# Process uploaded image
+if uploaded_image is not None:
+    img = load_image(uploaded_image)
     st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
+    image_to_predict = uploaded_image
 
+# Process captured image
+elif captured_image is not None:
+    img = load_image(captured_image)
+    st.image(img, caption="Captured Leaf Image", use_column_width=True)
+    image_to_predict = captured_image
+
+else:
+    st.info("Upload an image or use the camera to capture one.")
+    image_to_predict = None
+
+if image_to_predict is not None:
     with st.spinner("Analyzing the image..."):
-        prediction, class_name, confidence = Plant_Disease_Detection(img_file_buffer)
+        prediction, class_name, confidence = Plant_Disease_Detection(image_to_predict)
         if prediction is not None:
             st.write(f"Prediction: {class_name}")
             st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
@@ -257,5 +238,3 @@ elif img_file_buffer is not None:
             st.table(df)
         else:
             st.error("Failed to make a prediction. Please check the logs for details.")
-else:
-    st.write("Please upload an image or use the camera to capture a leaf image.")
