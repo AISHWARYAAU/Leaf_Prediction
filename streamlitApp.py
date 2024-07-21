@@ -224,4 +224,3 @@ if img_file_buffer is not None:
             st.table(df)
         else:
             st.error("Failed to make a prediction. Please check the logs for details.")
-
