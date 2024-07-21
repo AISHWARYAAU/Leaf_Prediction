@@ -214,7 +214,7 @@ if img_file_buffer is not None:
             recommendation = remedies.get(class_name, 'No recommendation available.')
             
             data = {
-                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Confidence"],
+                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
                 "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
                            class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
                            recommendation,
