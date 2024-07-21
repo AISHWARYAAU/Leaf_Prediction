@@ -24,7 +24,7 @@ st.caption(
     "A ResNet 34-based Algorithm for Robust Plant Disease Detection with 99.2% Accuracy Across 39 Different Classes of Plant Leaf Images."
 )
 
-st.write("Try clicking a leaf image and watch how an AI Model will detect its disease.")
+st.write("Try clicking a leaf image or capturing one from your camera to see how an AI Model detects its disease.")
 
 with st.sidebar:
     img = Image.open("./Images/leaf.png")
@@ -196,10 +196,43 @@ def Plant_Disease_Detection(image_path):
     confidence = np.max(prediction) * 100  # Confidence level
     return prediction, predicted_class, confidence
 
-# Main script to handle file upload and predictions
+# Main script to handle file upload and camera input
+st.write("Upload an image or use the camera to capture a leaf image.")
+
+# Camera input
+camera_input = st.camera_input("Capture a leaf image from your camera")
+
+# File uploader
 img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
 
-if img_file_buffer is not None:
+# Determine which input source is being used
+if camera_input is not None:
+    img = load_image(camera_input)
+    st.image(img, caption="Captured Leaf Image", use_column_width=True)
+
+    with st.spinner("Analyzing the image..."):
+        prediction, class_name, confidence = Plant_Disease_Detection(camera_input)
+        if prediction is not None:
+            st.write(f"Prediction: {class_name}")
+            st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
+            st.write(f"Confidence: {confidence:.2f}%")
+            
+            # Prepare data for the table
+            recommendation = remedies.get(class_name, 'No recommendation available.')
+            
+            data = {
+                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
+                "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
+                           class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
+                           recommendation,
+                           f"{confidence:.2f}%"]
+            }
+            df = pd.DataFrame(data)
+            st.table(df)
+        else:
+            st.error("Failed to make a prediction. Please check the logs for details.")
+
+elif img_file_buffer is not None:
     img = load_image(img_file_buffer)
     st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
 
@@ -224,3 +257,5 @@ if img_file_buffer is not None:
             st.table(df)
         else:
             st.error("Failed to make a prediction. Please check the logs for details.")
+else:
+    st.write("Please upload an image or use the camera to capture a leaf image.")
