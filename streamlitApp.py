@@ -16,7 +16,7 @@ if plt == "Windows":
 np.set_printoptions(suppress=True)
 
 # Set up the page layout
-st.set_page_config(page_title="ChromaticScan", page_icon="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/svgs/solid/leaf.svg")
+st.set_page_config(page_title="ChromaticScan", page_icon=":leaf:")
 
 st.title("ChromaticScan")
 
