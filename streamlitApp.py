@@ -124,7 +124,7 @@ classes_and_descriptions = {
     "Background_without_leaves": "No plant leaf detected in the image.",
 }
 
-# Define remedies for each class (example)
+# Define remedies for each class
 remedies = {
     "Apple___Apple_scab": "Apply fungicide and remove affected leaves.",
     "Apple___Black_rot": "Use copper-based fungicides and prune infected branches.",
@@ -182,45 +182,70 @@ def load_model_file(model_path):
         return None
 
 # Function for Plant Disease Detection
-def Plant_Disease_Detection(image_path):
+def Plant_Disease_Detection(image):
     model = load_model_file("Plant_disease.h5")
     if model is None:
         return None, None, None
 
-    image = Image.open(image_path).resize((256, 256))
+    image = image.resize((256, 256))
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
     prediction = model.predict(image)
     predicted_class = classes[np.argmax(prediction)]
     confidence = np.max(prediction) * 100  # Confidence level
-    return prediction, predicted_class, confidence
+    return predicted_class, confidence
 
-# Main script to handle file upload and predictions
-img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
+# Set up the sidebar
+st.subheader("Select Image Input Method")
+input_method = st.radio("options", ["File Uploader", "Camera Input"], label_visibility="collapsed")
 
-if img_file_buffer is not None:
-    img = load_image(img_file_buffer)
-    st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
+# Handle image input
+if input_method == "File Uploader":
+    uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
+    if uploaded_file is not None:
+        uploaded_file_img = load_image(uploaded_file)
+        st.image(uploaded_file_img, caption="Uploaded Image", width=300)
+        st.success("Image uploaded successfully!")
 
-    with st.spinner("Analyzing the image..."):
-        prediction, class_name, confidence = Plant_Disease_Detection(img_file_buffer)
-        if prediction is not None:
-            st.write(f"Prediction: {class_name}")
-            st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
-            st.write(f"Confidence: {confidence:.2f}%")
-            
-            # Prepare data for the table
-            recommendation = remedies.get(class_name, 'No recommendation available.')
-            
-            data = {
-                "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
-                "Values": ["Unhealthy" if class_name != "healthy" else "Healthy", 
-                           class_name.split('___')[1] if len(class_name.split('___')) > 1 else 'Healthy',
-                           recommendation,
-                           f"{confidence:.2f}%"]
-            }
-            df = pd.DataFrame(data)
-            st.table(df)
-        else:
-            st.error("Failed to make a prediction. Please check the logs for details.")
+elif input_method == "Camera Input":
+    st.warning("Please allow access to your camera.")
+    camera_image_file = st.camera_input("Click an Image")
+    if camera_image_file is not None:
+        camera_file_img = load_image(camera_image_file)
+        st.image(camera_file_img, caption="Camera Input Image", width=300)
+        st.success("Image clicked successfully!")
+
+# Button to trigger prediction
+submit = st.button(label="Submit Leaf Image")
+if submit:
+    st.subheader("Output")
+    if input_method == "File Uploader" and uploaded_file is not None:
+        image = uploaded_file_img
+    elif input_method == "Camera Input" and camera_image_file is not None:
+        image = camera_file_img
+
+    if image is not None:
+        with st.spinner(text="This may take a moment..."):
+            predicted_class, confidence = Plant_Disease_Detection(image)
+            if predicted_class:
+                st.write(f"Prediction: {predicted_class}")
+                st.write(f"Description: {classes_and_descriptions.get(predicted_class, 'No description available.')}")
+                st.write(f"Confidence: {confidence:.2f}%")
+                
+                # Prepare data for the table
+                recommendation = remedies.get(predicted_class, 'No recommendation available.')
+                
+                data = {
+                    "Details": ["Leaf Status", "Disease Name", "Recommendation", "Accuracy"],
+                    "Values": ["Unhealthy" if predicted_class != "healthy" else "Healthy", 
+                               predicted_class.split('___')[1] if len(predicted_class.split('___')) > 1 else 'Healthy',
+                               recommendation,
+                               f"{confidence:.2f}%"]
+                }
+                df = pd.DataFrame(data)
+                st.table(df)
+            else:
+                st.error("Error in prediction. Please try again.")
+    else:
+        st.warning("Please upload or capture an image first.")
