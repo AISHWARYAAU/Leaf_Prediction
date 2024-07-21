@@ -123,101 +123,49 @@ classes_and_descriptions = {
     "Tomato___Tomato_Yellow_Leaf_Curl_Virus": "Tomato leaf with Tomato Yellow Leaf Curl Virus disease detected.",
     "Tomato___Tomato_mosaic_virus": "Tomato leaf with Tomato mosaic virus disease detected.",
     "Tomato___healthy": "Healthy tomato leaf detected.",
-    "Background_without_leaves": "The provided image doesn't contain leaves.",
+    "Background_without_leaves": "No plant leaf detected in the image.",
 }
 
-df_rem = pd.DataFrame({
-    "Diseases": ["Apple___Apple_scab", "Apple___Black_rot", "Tomato___Bacterial_spot"],
-    "Remedies": [
-        "Use fungicides and plant resistant varieties.",
-        "Prune and destroy infected leaves and branches.",
-        "Use copper-based sprays and improve air circulation around plants."
-    ]
-})
 
 # Define the functions to load images
-def load_uploaded_image(file):
-    file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
-    opencv_image = cv2.imdecode(file_bytes, 1)
-    return opencv_image
+def load_image(image_file):
+    img = Image.open(image_file)
+    return img
 
-# Set up the sidebar
-st.subheader("Select Image Input Method")
-input_method = st.radio(
-    "options", ["File Uploader", "Camera Input"], label_visibility="collapsed"
-)
-
-# Check which input method was selected
-if input_method == "File Uploader":
-    uploaded_file = st.file_uploader(
-        "Choose an image file", type=["jpg", "jpeg", "png"]
-    )
-    if uploaded_file is not None:
-        uploaded_file_img = load_uploaded_image(uploaded_file)
-        st.image(uploaded_file_img, caption="Uploaded Image", width=300)
-        st.success("Image uploaded successfully!")
+# Function to load the model
+def load_model_file(model_path):
+    if os.path.exists(model_path):
+        model = load_model(model_path)
+        return model
     else:
-        st.warning("Please upload an image file.")
+        st.error("Model file not found. Please check the path and try again.")
+        return None
 
-elif input_method == "Camera Input":
-    st.warning("Please allow access to your camera.")
-    camera_image_file = st.camera_input("Click an Image")
-    if camera_image_file is not None:
-        camera_file_img = load_uploaded_image(camera_image_file)
-        st.image(camera_file_img, caption="Camera Input Image", width=300)
-        st.success("Image clicked successfully!")
-    else:
-        st.warning("Please click an image.")
+# Function for Plant Disease Detection
+def Plant_Disease_Detection(image_path):
+    model = load_model_file("models/Plant_disease.h5")
+    if model is None:
+        return None, None
 
-# Model file path
-export_file_path = os.path.join(os.path.dirname(__file__), "models", "Plant_disease.h5")
+    image = Image.open(image_path).resize((256, 256))
+    image = np.array(image) / 255.0
+    image = np.expand_dims(image, axis=0)
 
-def Plant_Disease_Detection(img_file_path):
-    try:
-        model = load_model(export_file_path)
-        img_array = cv2.resize(img_file_path, (224, 224))  # Resizing to match model input size
-        img_array = np.expand_dims(img_array, axis=0)  # Adding batch dimension
-        prediction = model.predict(img_array)
-        predicted_class = classes[np.argmax(prediction)]
-        if predicted_class not in classes:
-            prediction_sentence = f"The uploaded image is {predicted_class}, which is not compatible with the application. Please upload an image of a plant leaf for disease detection."
-            return prediction_sentence
-        prediction_sentence = classes_and_descriptions[predicted_class]
-        return prediction_sentence, predicted_class
-    except FileNotFoundError:
-        return "Model file not found. Please check the path and try again.", None
+    prediction = model.predict(image)
+    predicted_class = classes[np.argmax(prediction)]
+    return prediction, predicted_class
 
-submit = st.button(label="Submit Leaf Image")
-if submit:
-    st.subheader("Output")
-    if input_method == "File Uploader":
-        img_file_path = uploaded_file_img
-    elif input_method == "Camera Input":
-        img_file_path = camera_file_img
-    prediction, class_name = Plant_Disease_Detection(img_file_path)
-    with st.spinner(text="This may take a moment..."):
-        if class_name is None:
-            st.error(prediction)
-        elif "healthy" in class_name:
-            st.write(f"Prediction:\nLeaf name: {class_name.split('___')[0]} \nLeaf is: Healthy")
+# Main script to handle file upload and predictions
+img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
+
+if img_file_buffer is not None:
+    img = load_image(img_file_buffer)
+    st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
+
+    with st.spinner("Analyzing the image..."):
+        prediction, class_name = Plant_Disease_Detection(img_file_buffer)
+        if prediction is not None:
+            st.write(f"Prediction: {class_name}")
+            st.write(f"Description: {classes_and_descriptions[class_name]}")
         else:
-            disease_name = class_name.split("___")[1].replace("_", " ")
-            remedies = df_rem[df_rem["Diseases"] == class_name]["Remedies"].values[0] if not df_rem[df_rem["Diseases"] == class_name].empty else "No remedies available."
-            plant_details = ["Leaf name", "Leaf is", "Disease Name", "Remedies"]
-            values = [class_name.split('___')[0], "Unhealthy", disease_name, remedies]
-            details_dict = {"Details": plant_details, "Values": values}
-            details_df = pd.DataFrame(details_dict)
-            st.title("Prediction:")
-            st.table(details_df)
-
-footer = """
-<div style="text-align: center; font-size: medium; margin-top:50px;">
-    If you find ChromaticScan useful or interesting, please consider starring it on GitHub.
-    <hr>
-    <a href="https://github.com/SaiJeevanPuchakayala/ChromaticScan" target="_blank">
-    <img src="https://img.shields.io/github/stars/SaiJeevanPuchakayala/ChromaticScan.svg?style=social" alt="GitHub stars">
-  </a>
-</div>
-"""
-
-st.markdown(footer, unsafe_allow_html=True)
+            st.error("Failed to make a prediction. Please check the logs for details.")
