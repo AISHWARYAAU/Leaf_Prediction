@@ -182,12 +182,12 @@ def load_model_file(model_path):
         return None
 
 # Function for Plant Disease Detection
-def Plant_Disease_Detection(image):
+def Plant_Disease_Detection(image_path):
     model = load_model_file("Plant_disease.h5")
     if model is None:
         return None, None, None
 
-    image = image.resize((256, 256))
+    image = Image.open(image_path).resize((256, 256))
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
@@ -196,29 +196,15 @@ def Plant_Disease_Detection(image):
     confidence = np.max(prediction) * 100  # Confidence level
     return prediction, predicted_class, confidence
 
-# Main script to handle file upload and camera capture
-uploaded_image = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
-captured_image = st.camera_input("Capture an image of a leaf")
+# Main script to handle file upload and predictions
+img_file_buffer = st.file_uploader("Upload an image of a leaf", type=["jpg", "jpeg", "png"])
 
-# Process uploaded image
-if uploaded_image is not None:
-    img = load_image(uploaded_image)
+if img_file_buffer is not None:
+    img = load_image(img_file_buffer)
     st.image(img, caption="Uploaded Leaf Image", use_column_width=True)
-    image_to_predict = uploaded_image
 
-# Process captured image
-elif captured_image is not None:
-    img = load_image(captured_image)
-    st.image(img, caption="Captured Leaf Image", use_column_width=True)
-    image_to_predict = captured_image
-
-else:
-    st.info("Upload an image or use the camera to capture one.")
-    image_to_predict = None
-
-if image_to_predict is not None:
     with st.spinner("Analyzing the image..."):
-        prediction, class_name, confidence = Plant_Disease_Detection(image_to_predict)
+        prediction, class_name, confidence = Plant_Disease_Detection(img_file_buffer)
         if prediction is not None:
             st.write(f"Prediction: {class_name}")
             st.write(f"Description: {classes_and_descriptions.get(class_name, 'No description available.')}")
@@ -238,3 +224,4 @@ if image_to_predict is not None:
             st.table(df)
         else:
             st.error("Failed to make a prediction. Please check the logs for details.")
+
