@@ -193,76 +193,53 @@ elif page == "Charts":
         "Validation Loss": val_loss
     })
 
-    # Sample data to illustrate performance
-    data = {
-        'Model': ['ResNet34', 'ResNet50', 'VGG16', 'VGG19', 'AlexNet', 'InceptionV3', 'DenseNet121', 'EfficientNetB0', 'SqueezeNet', 'Xception'],
-        'Accuracy': [99.0, 98.5, 97.8, 97.4, 98.0, 96.5, 97.0, 96.9, 95.7, 96.0],
-        'Precision': [98.7, 98.0, 97.5, 97.0, 97.8, 96.0, 96.5, 95.8, 95.2, 96.1],
-        'Recall': [99.1, 98.7, 97.9, 97.5, 98.2, 96.8, 97.2, 96.5, 95.9, 96.3],
-        'F1-Score': [98.9, 98.3, 97.7, 97.2, 97.9, 96.4, 96.8, 96.2, 95.6, 96.1],
-        'Training Time (hrs)': [12, 14, 10, 11, 8, 15, 13, 14, 9, 16],
-        'Number of Parameters (M)': [21, 25, 138, 143, 61, 24, 8, 5, 1, 22],
-    }
+  # Sample data to illustrate performance
+data = {
+    'Model': ['ResNet34', 'ResNet50', 'VGG16', 'VGG19', 'AlexNet', 'InceptionV3', 'DenseNet121', 'EfficientNetB0', 'SqueezeNet', 'Xception'],
+    'Accuracy': [99.0, 98.5, 97.8, 97.4, 98.0, 96.5, 97.0, 96.9, 95.7, 96.0],
+    'Precision': [98.7, 98.0, 97.5, 97.0, 97.8, 96.0, 96.5, 95.8, 95.2, 96.1],
+    'Recall': [99.1, 98.7, 97.9, 97.5, 98.2, 96.8, 97.2, 96.5, 95.9, 96.3],
+    'F1-Score': [98.9, 98.3, 97.7, 97.2, 97.9, 96.4, 96.8, 96.2, 95.6, 96.1],
+    'Training Time (hrs)': [12, 14, 10, 11, 8, 15, 13, 14, 9, 16],
+    'Number of Parameters (M)': [21, 25, 138, 143, 61, 24, 8, 5, 1, 22],
+}
 
-    df = pd.DataFrame(data)
+df = pd.DataFrame(data)
 
-    # Set the aesthetic style of the plots
-    sns.set_style("whitegrid")
+# Set the aesthetic style of the plots
+sns.set_style("whitegrid")
 
-    # Create subplots
-    fig, axs = plt.subplots(5, 2, figsize=(14, 20))
+# Create subplots
+fig, axs = plt.subplots(3, 2, figsize=(16, 18))
 
-    # Plot 1: Model Accuracy
-    sns.barplot(x='Model', y='Accuracy', data=df, ax=axs[0, 0])
-    axs[0, 0].set_title('Model Accuracy')
-    axs[0, 0].set_xticklabels(df['Model'], rotation=45)
+# Plot 1: Accuracy by Model
+sns.barplot(x='Model', y='Accuracy', data=df, ax=axs[0, 0], palette='viridis')
+axs[0, 0].set_title('Model Accuracy')
+axs[0, 0].set_xticklabels(df['Model'], rotation=45)
 
-    # Plot 2: Model Precision
-    sns.barplot(x='Model', y='Precision', data=df, ax=axs[0, 1])
-    axs[0, 1].set_title('Model Precision')
-    axs[0, 1].set_xticklabels(df['Model'], rotation=45)
+# Plot 2: Precision by Model
+sns.barplot(x='Model', y='Precision', data=df, ax=axs[0, 1], palette='coolwarm')
+axs[0, 1].set_title('Model Precision')
+axs[0, 1].set_xticklabels(df['Model'], rotation=45)
 
-    # Plot 3: Model Recall
-    sns.barplot(x='Model', y='Recall', data=df, ax=axs[1, 0])
-    axs[1, 0].set_title('Model Recall')
-    axs[1, 0].set_xticklabels(df['Model'], rotation=45)
+# Plot 3: Recall by Model
+sns.barplot(x='Model', y='Recall', data=df, ax=axs[1, 0], palette='magma')
+axs[1, 0].set_title('Model Recall')
+axs[1, 0].set_xticklabels(df['Model'], rotation=45)
 
-    # Plot 4: Model F1-Score
-    sns.barplot(x='Model', y='F1-Score', data=df, ax=axs[1, 1])
-    axs[1, 1].set_title('Model F1-Score')
-    axs[1, 1].set_xticklabels(df['Model'], rotation=45)
+# Plot 4: F1-Score by Model
+sns.barplot(x='Model', y='F1-Score', data=df, ax=axs[1, 1], palette='plasma')
+axs[1, 1].set_title('Model F1-Score')
+axs[1, 1].set_xticklabels(df['Model'], rotation=45)
 
-    # Plot 5: Training Time
-    sns.barplot(x='Model', y='Training Time (hrs)', data=df, ax=axs[2, 0])
-    axs[2, 0].set_title('Training Time')
-    axs[2, 0].set_xticklabels(df['Model'], rotation=45)
+# Plot 5: Training Time by Model
+sns.scatterplot(x='Model', y='Training Time (hrs)', data=df, ax=axs[2, 0], hue='Model', palette='Set1', s=100)
+axs[2, 0].set_title('Training Time (hrs)')
+axs[2, 0].set_xticklabels(df['Model'], rotation=45)
 
-    # Plot 6: Number of Parameters
-    sns.barplot(x='Model', y='Number of Parameters (M)', data=df, ax=axs[2, 1])
-    axs[2, 1].set_title('Number of Parameters')
-    axs[2, 1].set_xticklabels(df['Model'], rotation=45)
+# Plot 6: Number of Parameters by Model
+sns.boxplot(x='Number of Parameters (M)', data=df, ax=axs[2, 1], palette='crest')
+axs[2, 1].set_title('Number of Parameters (M)')
 
-    # Plot 7: Accuracy Comparison (Highlighting ResNet34)
-    sns.barplot(x='Model', y='Accuracy', data=df, ax=axs[3, 0], palette='coolwarm')
-    axs[3, 0].set_title('Accuracy Comparison (Highlighting ResNet34)')
-    axs[3, 0].set_xticklabels(df['Model'], rotation=45)
-    axs[3, 0].axhline(y=99.0, color='r', linestyle='--', label='ResNet34 Accuracy')
-    axs[3, 0].legend()
-
-    # Plot 8: Precision Comparison
-    sns.barplot(x='Model', y='Precision', data=df, ax=axs[3, 1], palette='viridis')
-    axs[3, 1].set_title('Precision Comparison')
-    axs[3, 1].set_xticklabels(df['Model'], rotation=45)
-
-    # Plot 9: Recall Comparison
-    sns.barplot(x='Model', y='Recall', data=df, ax=axs[4, 0], palette='magma')
-    axs[4, 0].set_title('Recall Comparison')
-    axs[4, 0].set_xticklabels(df['Model'], rotation=45)
-
-    # Plot 10: F1-Score Comparison
-    sns.barplot(x='Model', y='F1-Score', data=df, ax=axs[4, 1], palette='plasma')
-    axs[4, 1].set_title('F1-Score Comparison')
-    axs[4, 1].set_xticklabels(df['Model'], rotation=45)
-
-    plt.tight_layout()
-    st.pyplot(fig)
+plt.tight_layout()
+st.pyplot(fig)
