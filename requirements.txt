@@ -1,7 +1,5 @@
 seaborn
-
- matplotlib
-seaborn
+matplotlib
 pandas
 aiofiles
 aiohttp
