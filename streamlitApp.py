@@ -279,6 +279,7 @@ elif page == "Charts":
     st.subheader("Charts and Visualizations")
 
   
+   
     # Sample data for accuracy and loss
     epochs = range(1, 21)
     accuracy = [0.7, 0.75, 0.78, 0.82, 0.85, 0.87, 0.88, 0.89, 0.9, 0.91, 0.91, 0.92, 0.92, 0.93, 0.93, 0.94, 0.94, 0.95, 0.95, 0.95]
@@ -288,20 +289,30 @@ elif page == "Charts":
 
     # Plot Training and Validation Accuracy
     fig, axs = plt.subplots(2, 1, figsize=(14, 10))
-    sns.lineplot(x=epochs, y=accuracy, ax=axs[0], label='Training Accuracy', color='b', marker='o')
-    sns.lineplot(x=epochs, y=val_accuracy, ax=axs[0], label='Validation Accuracy', color='g', marker='o')
-    axs[0].set_title('Model Accuracy Over Epochs')
-    axs[0].set_xlabel('Epochs')
-    axs[0].set_ylabel('Accuracy')
-    axs[0].legend()
 
-    # Plot Training and Validation Loss
-    sns.lineplot(x=epochs, y=loss, ax=axs[1], label='Training Loss', color='r', marker='o')
-    sns.lineplot(x=epochs, y=val_loss, ax=axs[1], label='Validation Loss', color='orange', marker='o')
+    # Training and Validation Accuracy
+    axs[0].barh(epochs, accuracy, color='b', label='Training Accuracy')
+    axs[0].barh(epochs, val_accuracy, color='g', alpha=0.6, label='Validation Accuracy')
+    axs[0].set_title('Model Accuracy Over Epochs')
+    axs[0].set_xlabel('Accuracy')
+    axs[0].set_ylabel('Epochs')
+    axs[0].legend()
+    for i, v in enumerate(accuracy):
+        axs[0].text(v, i, f'{v:.2f}', color='b', va='center')
+    for i, v in enumerate(val_accuracy):
+        axs[0].text(v, i + 0.2, f'{v:.2f}', color='g', va='center')
+
+    # Training and Validation Loss
+    axs[1].barh(epochs, loss, color='r', label='Training Loss')
+    axs[1].barh(epochs, val_loss, color='orange', alpha=0.6, label='Validation Loss')
     axs[1].set_title('Model Loss Over Epochs')
-    axs[1].set_xlabel('Epochs')
-    axs[1].set_ylabel('Loss')
+    axs[1].set_xlabel('Loss')
+    axs[1].set_ylabel('Epochs')
     axs[1].legend()
+    for i, v in enumerate(loss):
+        axs[1].text(v, i, f'{v:.2f}', color='r', va='center')
+    for i, v in enumerate(val_loss):
+        axs[1].text(v, i + 0.2, f'{v:.2f}', color='orange', va='center')
 
     plt.tight_layout()
     st.pyplot(fig)
@@ -318,7 +329,7 @@ elif page == "Charts":
         'Training Time (hrs)': [12, 14, 10, 11, 8, 15, 13, 14, 9, 16],
         'Number of Parameters (M)': [21, 25, 138, 143, 61, 24, 8, 5, 1, 22],
     }
-    
+
     df = pd.DataFrame(data)
 
     # Set the aesthetic style of the plots
@@ -328,56 +339,66 @@ elif page == "Charts":
     fig, axs = plt.subplots(5, 2, figsize=(16, 24))
 
     # Plot 1: Model Accuracy
-    sns.barplot(x='Model', y='Accuracy (%)', data=df, ax=axs[0, 0], palette='Blues_d')
+    sns.barplot(x='Accuracy (%)', y='Model', data=df, ax=axs[0, 0], palette='Blues_d', orient='h')
     axs[0, 0].set_title('Model Accuracy')
-    axs[0, 0].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Accuracy (%)']):
+        axs[0, 0].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 2: Model Precision
-    sns.barplot(x='Model', y='Precision (%)', data=df, ax=axs[0, 1], palette='Greens_d')
+    sns.barplot(x='Precision (%)', y='Model', data=df, ax=axs[0, 1], palette='Greens_d', orient='h')
     axs[0, 1].set_title('Model Precision')
-    axs[0, 1].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Precision (%)']):
+        axs[0, 1].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 3: Model Recall
-    sns.barplot(x='Model', y='Recall (%)', data=df, ax=axs[1, 0], palette='Reds_d')
+    sns.barplot(x='Recall (%)', y='Model', data=df, ax=axs[1, 0], palette='Reds_d', orient='h')
     axs[1, 0].set_title('Model Recall')
-    axs[1, 0].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Recall (%)']):
+        axs[1, 0].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 4: Model F1-Score
-    sns.barplot(x='Model', y='F1-Score (%)', data=df, ax=axs[1, 1], palette='Purples_d')
+    sns.barplot(x='F1-Score (%)', y='Model', data=df, ax=axs[1, 1], palette='Purples_d', orient='h')
     axs[1, 1].set_title('Model F1-Score')
-    axs[1, 1].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['F1-Score (%)']):
+        axs[1, 1].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 5: Training Time
-    sns.barplot(x='Model', y='Training Time (hrs)', data=df, ax=axs[2, 0], palette='Oranges_d')
+    sns.barplot(x='Training Time (hrs)', y='Model', data=df, ax=axs[2, 0], palette='Oranges_d', orient='h')
     axs[2, 0].set_title('Training Time')
-    axs[2, 0].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Training Time (hrs)']):
+        axs[2, 0].text(value, index, f'{value:.1f} hrs', va='center')
 
     # Plot 6: Number of Parameters
-    sns.barplot(x='Model', y='Number of Parameters (M)', data=df, ax=axs[2, 1], palette='Greys_d')
+    sns.barplot(x='Number of Parameters (M)', y='Model', data=df, ax=axs[2, 1], palette='Greys_d', orient='h')
     axs[2, 1].set_title('Number of Parameters')
-    axs[2, 1].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Number of Parameters (M)']):
+        axs[2, 1].text(value, index, f'{value:.1f} M', va='center')
 
     # Plot 7: Accuracy Comparison (Highlighting ResNet34)
-    sns.barplot(x='Model', y='Accuracy (%)', data=df, ax=axs[3, 0], palette='coolwarm')
+    sns.barplot(x='Accuracy (%)', y='Model', data=df, ax=axs[3, 0], palette='coolwarm', orient='h')
     axs[3, 0].set_title('Accuracy Comparison (Highlighting ResNet34)')
-    axs[3, 0].set_xticklabels(df['Model'], rotation=45)
-    axs[3, 0].axhline(y=99.0, color='r', linestyle='--', label='ResNet34 Accuracy')
+    axs[3, 0].axvline(x=99.0, color='r', linestyle='--', label='ResNet34 Accuracy')
     axs[3, 0].legend()
+    for index, value in enumerate(df['Accuracy (%)']):
+        axs[3, 0].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 8: Precision Comparison
-    sns.barplot(x='Model', y='Precision (%)', data=df, ax=axs[3, 1], palette='viridis')
+    sns.barplot(x='Precision (%)', y='Model', data=df, ax=axs[3, 1], palette='viridis', orient='h')
     axs[3, 1].set_title('Precision Comparison')
-    axs[3, 1].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Precision (%)']):
+        axs[3, 1].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 9: Recall Comparison
-    sns.barplot(x='Model', y='Recall (%)', data=df, ax=axs[4, 0], palette='magma')
+    sns.barplot(x='Recall (%)', y='Model', data=df, ax=axs[4, 0], palette='magma', orient='h')
     axs[4, 0].set_title('Recall Comparison')
-    axs[4, 0].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['Recall (%)']):
+        axs[4, 0].text(value, index, f'{value:.1f}%', va='center')
 
     # Plot 10: F1-Score Comparison
-    sns.barplot(x='Model', y='F1-Score (%)', data=df, ax=axs[4, 1], palette='plasma')
+    sns.barplot(x='F1-Score (%)', y='Model', data=df, ax=axs[4, 1], palette='plasma', orient='h')
     axs[4, 1].set_title('F1-Score Comparison')
-    axs[4, 1].set_xticklabels(df['Model'], rotation=45)
+    for index, value in enumerate(df['F1-Score (%)']):
+        axs[4, 1].text(value, index, f'{value:.1f}%', va='center')
 
     plt.tight_layout()
     st.pyplot(fig)
