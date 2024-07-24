@@ -6,8 +6,6 @@ import pandas as pd
 import os
 import platform
 import pathlib
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Platform-specific path handling
 plt = platform.system()
@@ -127,61 +125,4 @@ elif page == "Prediction":
 # Charts Page
 elif page == "Charts":
     st.subheader("Charts and Visualizations")
-
-    # Sample data for accuracy and loss
-    # Replace these with your actual data
-    epochs = range(1, 21)
-    accuracy = [0.7, 0.75, 0.78, 0.82, 0.85, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.92, 0.93, 0.94, 0.94, 0.95, 0.95, 0.96, 0.96, 0.96]
-    val_accuracy = [0.68, 0.74, 0.76, 0.81, 0.83, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.91, 0.92, 0.93, 0.93, 0.94, 0.94, 0.95, 0.95, 0.95]
-
-    loss = [0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.16, 0.14, 0.12, 0.1, 0.08, 0.06, 0.04]
-    val_loss = [0.62, 0.58, 0.53, 0.48, 0.43, 0.38, 0.34, 0.32, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.16, 0.14, 0.12, 0.1, 0.08]
-
-    # Plot Accuracy and Loss
-    st.write("### Training and Validation Accuracy")
-    fig, ax = plt.subplots()
-    ax.plot(epochs, accuracy, label='Training Accuracy')
-    ax.plot(epochs, val_accuracy, label='Validation Accuracy')
-    ax.set_xlabel('Epochs')
-    ax.set_ylabel('Accuracy')
-    ax.legend()
-    st.pyplot(fig)
-
-    st.write("### Training and Validation Loss")
-    fig, ax = plt.subplots()
-    ax.plot(epochs, loss, label='Training Loss')
-    ax.plot(epochs, val_loss, label='Validation Loss')
-    ax.set_xlabel('Epochs')
-    ax.set_ylabel('Loss')
-    ax.legend()
-    st.pyplot(fig)
-
-    # Confusion Matrix
-    # Assuming `confusion_matrix` is available
-    # Replace this with your actual confusion matrix data
-    confusion_matrix = np.array([
-        [80, 2, 1, 0, 0],
-        [3, 76, 2, 1, 1],
-        [2, 2, 82, 1, 1],
-        [0, 1, 2, 79, 2],
-        [0, 0, 1, 2, 81]
-    ])
-
-    st.write("### Confusion Matrix")
-    fig, ax = plt.subplots()
-    sns.heatmap(confusion_matrix, annot=True, fmt="d", cmap="YlGnBu", cbar=False)
-    ax.set_xlabel('Predicted')
-    ax.set_ylabel('Actual')
-    st.pyplot(fig)
-
-    # Class Distribution (Sample data)
-    # Replace these with your actual class distribution data
-    classes = ["Apple_scab", "Black_rot", "Cedar_apple_rust", "Healthy", "Powdery_mildew"]
-    num_images = [100, 150, 120, 130, 110]
-
-    st.write("### Class Distribution")
-    fig, ax = plt.subplots()
-    ax.bar(classes, num_images)
-    ax.set_xlabel('Class')
-    ax.set_ylabel('Number of Images')
-    st.pyplot(fig)
+    st.write("This section can be used to display various charts and visualizations related to plant diseases and their detection. You can use libraries like Matplotlib, Seaborn, or Plotly to create interactive charts.")
