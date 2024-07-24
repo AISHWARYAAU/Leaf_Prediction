@@ -280,7 +280,7 @@ elif page == "Charts":
 
   
    
-    # Sample data for accuracy and loss
+   # Sample data for accuracy and loss
     epochs = range(1, 21)
     accuracy = [0.7, 0.75, 0.78, 0.82, 0.85, 0.87, 0.88, 0.89, 0.9, 0.91, 0.91, 0.92, 0.92, 0.93, 0.93, 0.94, 0.94, 0.95, 0.95, 0.95]
     val_accuracy = [0.68, 0.72, 0.75, 0.8, 0.83, 0.85, 0.86, 0.87, 0.88, 0.89, 0.89, 0.9, 0.91, 0.91, 0.92, 0.92, 0.92, 0.93, 0.93, 0.94]
@@ -289,30 +289,20 @@ elif page == "Charts":
 
     # Plot Training and Validation Accuracy
     fig, axs = plt.subplots(2, 1, figsize=(14, 10))
-
-    # Training and Validation Accuracy
-    axs[0].barh(epochs, accuracy, color='b', label='Training Accuracy')
-    axs[0].barh(epochs, val_accuracy, color='g', alpha=0.6, label='Validation Accuracy')
+    sns.lineplot(x=epochs, y=accuracy, ax=axs[0], label='Training Accuracy', color='b', marker='o')
+    sns.lineplot(x=epochs, y=val_accuracy, ax=axs[0], label='Validation Accuracy', color='g', marker='o')
     axs[0].set_title('Model Accuracy Over Epochs')
-    axs[0].set_xlabel('Accuracy')
-    axs[0].set_ylabel('Epochs')
+    axs[0].set_xlabel('Epochs')
+    axs[0].set_ylabel('Accuracy')
     axs[0].legend()
-    for i, v in enumerate(accuracy):
-        axs[0].text(v, i, f'{v:.2f}', color='b', va='center')
-    for i, v in enumerate(val_accuracy):
-        axs[0].text(v, i + 0.2, f'{v:.2f}', color='g', va='center')
 
-    # Training and Validation Loss
-    axs[1].barh(epochs, loss, color='r', label='Training Loss')
-    axs[1].barh(epochs, val_loss, color='orange', alpha=0.6, label='Validation Loss')
+    # Plot Training and Validation Loss
+    sns.lineplot(x=epochs, y=loss, ax=axs[1], label='Training Loss', color='r', marker='o')
+    sns.lineplot(x=epochs, y=val_loss, ax=axs[1], label='Validation Loss', color='orange', marker='o')
     axs[1].set_title('Model Loss Over Epochs')
-    axs[1].set_xlabel('Loss')
-    axs[1].set_ylabel('Epochs')
+    axs[1].set_xlabel('Epochs')
+    axs[1].set_ylabel('Loss')
     axs[1].legend()
-    for i, v in enumerate(loss):
-        axs[1].text(v, i, f'{v:.2f}', color='r', va='center')
-    for i, v in enumerate(val_loss):
-        axs[1].text(v, i + 0.2, f'{v:.2f}', color='orange', va='center')
 
     plt.tight_layout()
     st.pyplot(fig)
