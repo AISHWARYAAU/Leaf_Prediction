@@ -169,16 +169,20 @@ def load_image(image_file):
 
 # Function to load the model
 def load_model_file(model_path):
-    if os.path.exists(model_path):
-        model = load_model(model_path)
-        return model
-    else:
-        st.error("Model file not found. Please check the path and try again.")
+    try:
+        if os.path.exists(model_path):
+            model = load_model(model_path)
+            return model
+        else:
+            st.error("Model file not found. Please check the path and try again.")
+            return None
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
         return None
 
 # Function for Plant Disease Detection
 def Plant_Disease_Detection(image):
-    model = load_model_file("Plant_disease.h5")
+    model = load_model_file("plant_disease_model.h5")
     if model is None:
         return None, None
 
