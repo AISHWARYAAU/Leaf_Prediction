@@ -170,10 +170,20 @@ model = load_plant_disease_model()
 
 # Image Preprocessing
 def preprocess_image(image):
+    # Resize the image to the size the model expects (224x224 for ResNet34)
     img = image.resize((224, 224))
-    img = np.array(img) / 255.0
-    img = np.expand_dims(img, axis=0)
-    return img
+
+    # Ensure it's in RGB mode (some images might be grayscale)
+    if image.mode != "RGB":
+        img = img.convert("RGB")
+
+    # Convert the image to a NumPy array and normalize pixel values
+    img_array = np.array(img) / 255.0
+
+    # Expand dimensions to match the model's input shape (1, 224, 224, 3)
+    img_array = np.expand_dims(img_array, axis=0)
+    
+    return img_array
 
 # Page: Home
 if page == "Home":
@@ -206,18 +216,24 @@ elif page == "Prediction":
         # Preprocess the image
         img_array = preprocess_image(image)
 
+        # Ensure the input shape matches the model's expected input
+        st.write(f"Image array shape: {img_array.shape}")
+
         # Make prediction
-        prediction = model.predict(img_array)
-        predicted_class = np.argmax(prediction)
-        class_name = classes[predicted_class]
-        confidence = np.max(prediction)
+        try:
+            prediction = model.predict(img_array)
+            predicted_class = np.argmax(prediction)
+            class_name = classes[predicted_class]
+            confidence = np.max(prediction)
 
-        st.write(f"**Prediction:** {class_name.replace('_', ' ')}")
-        st.write(f"**Confidence:** {confidence*100:.2f}%")
+            st.write(f"**Prediction:** {class_name.replace('_', ' ')}")
+            st.write(f"**Confidence:** {confidence*100:.2f}%")
 
-        # Show description and remedies
-        st.write(f"**Description:** {classes_and_descriptions[class_name]}")
-        st.write(f"**Remedy:** {remedies.get(class_name, 'No remedy available')}")
+            # Show description and remedies
+            st.write(f"**Description:** {classes_and_descriptions[class_name]}")
+            st.write(f"**Remedy:** {remedies.get(class_name, 'No remedy available')}")
+        except ValueError as e:
+            st.error(f"Error during prediction: {e}")
 
 # Page: Charts
 elif page == "Charts":
