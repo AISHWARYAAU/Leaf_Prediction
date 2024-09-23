@@ -185,94 +185,56 @@ def preprocess_image(image):
     
     return img_array
 
+
 # Page: Home
 if page == "Home":
     st.subheader("What ChromaticScan Can Do")
-    st.write(
-        """
+    st.write("""
         ChromaticScan leverages deep learning to classify plant diseases with an accuracy of 99.2%. 
         By utilizing a ResNet-34 architecture pre-trained on a large dataset of plant leaf images, 
         this app can accurately detect diseases from 39 classes, including various crops such as 
         apple, corn, grape, tomato, and more.
-        """
-    )
-    st.write(
-        """
+    """)
+    st.write("""
         Simply upload a leaf image or use your camera to take a picture, and the app will identify 
         the disease (if any) affecting the plant, along with suggested remedies.
-        """
-    )
-
-# Image Preprocessing function
-def preprocess_image(image):
-    try:
-        # Resize the image to (224, 224) as required by ResNet34
-        img = image.resize((224, 224))
-
-        # Ensure it's in RGB mode (if the image is grayscale, convert to RGB)
-        if image.mode != "RGB":
-            img = img.convert("RGB")
-
-        # Convert image to a NumPy array
-        img_array = np.array(img) / 255.0  # Normalize the image
-
-        # Expand dimensions to (1, 224, 224, 3) to match the model's expected input
-        img_array = np.expand_dims(img_array, axis=0)
-        
-        return img_array
-    except Exception as e:
-        st.error(f"Error in preprocessing image: {e}")
-        return None
+    """)
 
 # Page: Prediction
 elif page == "Prediction":
     st.subheader("Upload an Image to Diagnose Plant Disease")
 
-    # File uploader for image
     image_file = st.file_uploader("Upload an image of the plant leaf", type=["jpg", "jpeg", "png"])
 
     if image_file is not None:
-        # Open the uploaded image
         image = Image.open(image_file)
-        
-        # Display the uploaded image in the Streamlit app
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Preprocess the image
         img_array = preprocess_image(image)
 
         if img_array is not None:
-            # Ensure the input shape matches the model's expected input
             st.write(f"Processed Image array shape: {img_array.shape}")
 
-            # Try to make prediction
             try:
                 prediction = model.predict(img_array)
                 predicted_class = np.argmax(prediction)
                 class_name = classes[predicted_class]
                 confidence = np.max(prediction)
 
-                # Display the results
                 st.write(f"**Prediction:** {class_name.replace('_', ' ')}")
                 st.write(f"**Confidence:** {confidence * 100:.2f}%")
-
-                # Show additional information
                 st.write(f"**Description:** {classes_and_descriptions[class_name]}")
                 st.write(f"**Remedy:** {remedies.get(class_name, 'No remedy available')}")
-            
+
             except ValueError as e:
                 st.error(f"Error during prediction: {e}")
-        else:
-            st.error("Image preprocessing failed. Please upload a valid image.")
 
 # Page: Charts
 elif page == "Charts":
     st.subheader("Model Performance Charts")
-    
-    # Load data for charts
+
     df = pd.read_csv("model_metrics.csv")
 
-    # Accuracy and Loss
     st.write("### Model Accuracy and Loss Over Epochs")
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     sns.lineplot(x="epoch", y="accuracy", data=df, ax=ax[0])
