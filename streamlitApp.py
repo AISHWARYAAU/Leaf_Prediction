@@ -199,7 +199,6 @@ if page == "Home":
              "Simply upload an image of a leaf, and the app will classify the disease and provide treatment recommendations.")
     
 elif page == "Prediction":
-    elif page == "Prediction":
     st.header("Upload a Plant Leaf Image")
     st.write("To make a prediction, please click [here](https://chromaticscan-bcu.streamlit.app/)")
 
