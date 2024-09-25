@@ -199,34 +199,12 @@ if page == "Home":
              "Simply upload an image of a leaf, and the app will classify the disease and provide treatment recommendations.")
     
 elif page == "Prediction":
+    elif page == "Prediction":
     st.header("Upload a Plant Leaf Image")
-    image_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
-    
-    if image_file is not None:
-        image = load_image(image_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-        
-        predicted_class, confidence = Plant_Disease_Detection(image)
-        
-        # Display prediction results
-        st.subheader("Prediction Result:")
-        st.write(f"**Predicted Class:** {predicted_class.replace('_', ' ')}")
-        st.write(f"**Confidence:** {confidence:.2f}%")
-        
-        # Treatment recommendations
-        st.subheader("Treatment Recommendations:")
-        if predicted_class in remedies:
-            st.write(remedies[predicted_class])
-        else:
-            st.write("No treatment recommendations available.")
-        
-        # Show confidence pie chart
-        st.subheader("Confidence Distribution")
-        fig, ax = plt.subplots()
-        ax.pie([confidence, 100 - confidence], labels=['Predicted Confidence', 'Other'], autopct='%1.1f%%', startangle=90)
-        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        st.pyplot(fig)
+    st.write("To make a prediction, please click [here](https://chromaticscan-bcu.streamlit.app/)")
 
+      
+     
 elif page == "Charts":
     st.header("Model Performance Comparison")
     model_names = ["ResNet34", "InceptionV3", "VGG16", "EfficientNet"]
