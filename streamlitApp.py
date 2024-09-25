@@ -182,7 +182,7 @@ def load_model_file(model_path):
 
 # Function for Plant Disease Detection
 def Plant_Disease_Detection(image):
-    model = load_model_file("Plant_disease.h5")
+    model = load_model_file("plant_disease_model.h5")
     if model is None:
         return None, None
 
