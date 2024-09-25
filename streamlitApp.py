@@ -33,23 +33,6 @@ with st.sidebar:
     st.subheader("Navigation")
     page = st.radio("Go to", ["Home", "Prediction", "Charts"])
 
-# Classes and descriptions
-classes = [
-    "Apple___Apple_scab",
-    "Apple___Black_rot",
-    "Apple___Cedar_apple_rust",
-    "Apple___healthy",
-    "Blueberry___healthy",
-    # (remaining classes omitted for brevity)
-]
-
-# Define remedies for each class
-remedies = {
-    "Apple___Apple_scab": "Apply fungicide and remove affected leaves.",
-    "Apple___Black_rot": "Use copper-based fungicides and prune infected branches.",
-    # (remaining remedies omitted for brevity)
-}
-
 # Function to load and preprocess the image
 def load_image(image_file):
     img = Image.open(image_file)
@@ -163,7 +146,7 @@ elif page == "Charts":
     df = pd.DataFrame(data)
     st.dataframe(df)
 
- # Display DataFrame containing the model comparison
+    # Display DataFrame containing the model comparison
     st.write("""
     The table above compares the performance of various deep learning models in terms of accuracy, precision, recall, F1-score, 
     training time, and the number of parameters. The ResNet34 model, used in ChromaticScan, is optimized for a balance between 
@@ -171,38 +154,35 @@ elif page == "Charts":
     """)
 
     # Sample data for accuracy and loss limited to 10 epochs
-epochs = range(1, 11)
-accuracy = [0.7, 0.75, 0.78, 0.82, 0.85, 0.87, 0.88, 0.89, 0.9, 0.91]
-val_accuracy = [0.68, 0.72, 0.75, 0.8, 0.83, 0.85, 0.86, 0.87, 0.88, 0.89]
-loss = [0.8, 0.75, 0.72, 0.7, 0.68, 0.65, 0.63, 0.61, 0.59, 0.58]
-val_loss = [0.82, 0.78, 0.74, 0.72, 0.7, 0.68, 0.66, 0.65, 0.63, 0.62]
+    epochs = range(1, 11)
+    accuracy = [0.7, 0.75, 0.78, 0.82, 0.85, 0.87, 0.88, 0.89, 0.9, 0.91]
+    val_accuracy = [0.68, 0.72, 0.75, 0.8, 0.83, 0.85, 0.86, 0.87, 0.88, 0.89]
+    loss = [0.8, 0.75, 0.72, 0.7, 0.68, 0.65, 0.63, 0.61, 0.59, 0.58]
+    val_loss = [0.82, 0.78, 0.74, 0.72, 0.7, 0.68, 0.66, 0.65, 0.63, 0.62]
 
-# Plot accuracy and loss using Matplotlib
-import matplotlib.pyplot as plt
+    # Plot accuracy and loss using Matplotlib
+    # Create a figure with two subplots (one for accuracy and one for loss)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-# Create a figure with two subplots (one for accuracy and one for loss)
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    # Accuracy plot
+    ax1.plot(epochs, accuracy, 'b-', label='Training Accuracy')
+    ax1.plot(epochs, val_accuracy, 'r-', label='Validation Accuracy')
+    ax1.set_title('Training and Validation Accuracy')
+    ax1.set_xlabel('Epochs')
+    ax1.set_ylabel('Accuracy')
+    ax1.legend()
 
-# Accuracy plot
-ax1.plot(epochs, accuracy, 'b-', label='Training Accuracy')
-ax1.plot(epochs, val_accuracy, 'r-', label='Validation Accuracy')
-ax1.set_title('Training and Validation Accuracy')
-ax1.set_xlabel('Epochs')
-ax1.set_ylabel('Accuracy')
-ax1.legend()
+    # Loss plot
+    ax2.plot(epochs, loss, 'b-', label='Training Loss')
+    ax2.plot(epochs, val_loss, 'r-', label='Validation Loss')
+    ax2.set_title('Training and Validation Loss')
+    ax2.set_xlabel('Epochs')
+    ax2.set_ylabel('Loss')
+    ax2.legend()
 
-# Loss plot
-ax2.plot(epochs, loss, 'b-', label='Training Loss')
-ax2.plot(epochs, val_loss, 'r-', label='Validation Loss')
-ax2.set_title('Training and Validation Loss')
-ax2.set_xlabel('Epochs')
-ax2.set_ylabel('Loss')
-ax2.legend()
-
-# Display the plots
-plt.tight_layout()
-plt.show()
-
+    # Display the plots
+    plt.tight_layout()
+    plt.show()
 
     # You can also create a bar chart for better visual comparison
     st.subheader("Model Accuracy Comparison")
@@ -261,5 +241,3 @@ plt.show()
     of parameters and takes longer to train, it may not necessarily offer a significant boost in accuracy compared to ResNet34, which 
     achieves a better trade-off between model size, training time, and accuracy.
     """)
-
-# End of charts page and app logic.
